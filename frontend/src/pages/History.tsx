@@ -13,52 +13,54 @@ export const History = () => {
     }
   });
 
-  if (isLoading) return <div className="p-8">Loading history...</div>;
+  if (isLoading) return <div className="p-8 font-mono uppercase tracking-widest font-bold">Fetching Archive...</div>;
 
   return (
-    <div className="p-8 max-w-6xl mx-auto h-full">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold mb-2">Dataset History</h2>
-          <p className="text-muted-foreground">View past processing runs and access their results.</p>
-        </div>
+    <div className="p-8 max-w-6xl mx-auto h-full font-sans bg-background">
+      <div className="mb-10 border-b-4 border-border pb-6">
+        <h2 className="text-4xl font-display uppercase mb-4 text-foreground drop-shadow-[2px_2px_0px_hsl(var(--primary))]">
+          History_Archive
+        </h2>
+        <p className="text-muted-foreground font-mono font-bold uppercase tracking-widest">
+          &gt; Previous Data Payloads_
+        </p>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-6 pb-12">
         {datasets?.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground bg-card border border-border rounded-xl">
-            No datasets uploaded yet.
+          <div className="text-center py-16 text-muted-foreground bg-card border-4 border-border font-mono font-bold uppercase shadow-[8px_8px_0px_0px_hsl(var(--border))]">
+            NO RECORDS FOUND IN ARCHIVE.
           </div>
         ) : (
           datasets?.map((dataset: any) => (
             <div 
               key={dataset.id}
               onClick={() => navigate(dataset.status === 'Processing' ? `/processing?id=${dataset.id}` : `/results?id=${dataset.id}`)}
-              className="bg-card border border-border p-6 rounded-xl flex items-center justify-between cursor-pointer hover:border-primary/50 hover:shadow-md transition-all group"
+              className="bg-card border-4 border-border p-6 shadow-[6px_6px_0px_0px_hsl(var(--border))] flex items-center justify-between cursor-pointer hover:border-primary hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_hsl(var(--primary))] transition-all group"
             >
               <div className="flex items-center gap-6">
-                <div className="p-4 bg-muted rounded-full group-hover:bg-primary/10 transition-colors">
-                  {dataset.status === 'Completed' ? <CheckCircle2 className="text-green-500" /> :
-                   dataset.status === 'Processing' ? <Activity className="text-blue-500 animate-pulse" /> :
-                   <AlertCircle className="text-yellow-500" />}
+                <div className="p-4 bg-background border-2 border-border group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                  {dataset.status === 'Completed' ? <CheckCircle2 size={28} strokeWidth={2.5} /> :
+                   dataset.status === 'Processing' ? <Activity size={28} strokeWidth={2.5} className="animate-pulse" /> :
+                   <AlertCircle size={28} strokeWidth={2.5} className="text-destructive" />}
                 </div>
                 <div>
-                  <h4 className="text-lg font-semibold mb-1 group-hover:text-primary transition-colors">{dataset.filename}</h4>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1"><Clock size={14} /> {new Date(dataset.created_at).toLocaleString()}</span>
-                    <span>•</span>
-                    <span>{dataset.total_rows} rows</span>
-                    <span>•</span>
-                    <span className="font-medium">{dataset.status}</span>
+                  <h4 className="text-xl font-display uppercase mb-2 group-hover:text-primary transition-colors">{dataset.filename}</h4>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground font-mono font-bold uppercase">
+                    <span className="flex items-center gap-2"><Clock size={16} strokeWidth={2.5} /> {new Date(dataset.created_at).toLocaleString()}</span>
+                    <span>/</span>
+                    <span>{dataset.total_rows} ROWS</span>
+                    <span>/</span>
+                    <span className="text-foreground bg-secondary px-2 py-0.5 border-2 border-border">{dataset.status}</span>
                   </div>
                 </div>
               </div>
               
-              <div className="text-right">
-                <div className="text-sm font-medium mb-1">
-                  {dataset.processed_rows} / {dataset.total_rows}
+              <div className="text-right w-48 hidden md:block">
+                <div className="text-xs font-mono font-bold uppercase mb-2">
+                  {dataset.processed_rows} / {dataset.total_rows} PROCESSED
                 </div>
-                <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
+                <div className="w-full h-3 bg-background border-2 border-border p-0.5">
                   <div 
                     className="h-full bg-primary"
                     style={{ width: `${(dataset.processed_rows / (dataset.total_rows || 1)) * 100}%` }}

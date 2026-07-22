@@ -12,7 +12,6 @@ export const Processing = () => {
   const [logs, setLogs] = useState<string[]>([]);
   const logsEndRef = useRef<HTMLDivElement>(null);
 
-  // Fetch dataset status to check if completed
   const { data: dataset } = useQuery({
     queryKey: ['dataset', datasetId],
     queryFn: async () => {
@@ -26,7 +25,8 @@ export const Processing = () => {
   useEffect(() => {
     if (!datasetId) return;
 
-    const ws = new WebSocket(`${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}///ws/processing/${datasetId}`);
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const ws = new WebSocket(`${protocol}//${window.location.host}/ws/processing/${datasetId}`);
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -53,58 +53,62 @@ export const Processing = () => {
   const isCompleted = dataset?.status === 'Completed';
 
   if (!datasetId) {
-    return <div className="p-8 text-center text-muted-foreground">No dataset selected.</div>;
+    return <div className="p-8 text-center text-muted-foreground font-mono uppercase font-bold">No payload selected.</div>;
   }
 
   return (
-    <div className="p-8 max-w-5xl mx-auto h-full flex flex-col">
-      <div className="mb-8 flex items-center justify-between">
+    <div className="p-8 max-w-5xl mx-auto h-full flex flex-col font-sans">
+      <div className="mb-10 border-b-4 border-border pb-6 flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold mb-2 flex items-center gap-3">
+          <h2 className="text-3xl font-display uppercase mb-4 flex items-center gap-4 drop-shadow-[2px_2px_0px_hsl(var(--primary))]">
             {isCompleted ? (
-              <><CheckCircle2 className="text-green-500 h-8 w-8" /> Processing Complete</>
+              <><CheckCircle2 className="text-primary h-8 w-8" strokeWidth={3} /> SEQUENCE COMPLETE</>
             ) : (
-              <><Activity className="text-blue-500 h-8 w-8 animate-pulse" /> Processing Dataset #{datasetId}</>
+              <><Activity className="text-primary h-8 w-8 animate-pulse" strokeWidth={3} /> SYSTEM PROCESSING</>
             )}
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground font-mono font-bold uppercase tracking-widest">
             {isCompleted 
-              ? 'All companies have been verified and classified.' 
-              : 'Our AI engines are searching, scraping, and analyzing your dataset in real-time.'}
+              ? '> Data enrichment finalized_' 
+              : `> Executing analysis on payload #${datasetId}_`}
           </p>
         </div>
         {isCompleted && (
           <button 
             onClick={() => navigate(`/results?id=${datasetId}`)}
-            className="bg-primary text-primary-foreground px-6 py-2.5 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all"
+            className="bg-primary text-primary-foreground border-4 border-border px-6 py-3 font-display text-xs uppercase tracking-widest hover-zag-shadow hover-zag-dotted-grid transition-all"
           >
-            View Results
+            VIEW RESULTS
           </button>
         )}
       </div>
 
-      <div className="bg-card border border-border rounded-xl p-6 mb-8 shadow-sm">
-        <div className="flex justify-between text-sm mb-2 font-medium">
-          <span>Overall Progress</span>
-          <span>{progress.processed} / {progress.total || dataset?.total_rows || 0} ({progress.percent}%)</span>
+      <div className="bg-card border-4 border-border p-6 mb-8 shadow-[8px_8px_0px_0px_hsl(var(--border))]">
+        <div className="flex justify-between text-sm mb-4 font-mono font-bold uppercase">
+          <span>&gt; Processing Engine Status</span>
+          <span>{progress.processed} / {progress.total || dataset?.total_rows || 0} [ {progress.percent}% ]</span>
         </div>
-        <div className="w-full h-4 bg-muted rounded-full overflow-hidden">
+        <div className="w-full h-8 bg-background border-2 border-border p-1">
           <div 
-            className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-300"
+            className="h-full bg-primary transition-all duration-300 relative overflow-hidden"
             style={{ width: `${isCompleted ? 100 : progress.percent}%` }}
-          />
+          >
+            <div className="absolute inset-0 opacity-20" style={{
+              backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, #000 10px, #000 20px)'
+            }}></div>
+          </div>
         </div>
       </div>
 
-      <div className="flex-1 bg-black rounded-xl p-4 overflow-hidden flex flex-col font-mono text-sm border border-border shadow-inner">
-        <div className="flex items-center justify-between text-zinc-500 border-b border-zinc-800 pb-2 mb-4">
-          <span>Live Console Output</span>
-          <span className="flex items-center gap-2"><span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Connected</span>
+      <div className="flex-1 bg-black border-4 border-border p-4 flex flex-col font-mono text-sm shadow-[8px_8px_0px_0px_hsl(var(--primary))]">
+        <div className="flex items-center justify-between text-zinc-500 border-b-2 border-zinc-800 pb-2 mb-4 font-bold uppercase">
+          <span>CONSOLE_OUT</span>
+          <span className="flex items-center gap-2"><span className="w-3 h-3 bg-primary rounded-none animate-pulse border border-black"></span> CONNECTED</span>
         </div>
         <div className="flex-1 overflow-y-auto space-y-1">
           {logs.map((log, i) => (
             <div key={i} className="text-zinc-300">
-              <span className="text-zinc-600 mr-3">[{new Date().toLocaleTimeString()}]</span>
+              <span className="text-primary mr-3 font-bold">[{new Date().toLocaleTimeString()}]</span>
               {log}
             </div>
           ))}
