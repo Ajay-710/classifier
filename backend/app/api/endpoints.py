@@ -125,7 +125,12 @@ def export_dataset(dataset_id: int, db: Session = Depends(get_db)):
         'Content-Disposition': f'attachment; filename="estride_export_{dataset_id}.xlsx"'
     }
     
-    return StreamingResponse(output, headers=headers, media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    from fastapi import Response
+    return Response(
+        content=output.getvalue(), 
+        headers=headers, 
+        media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
 
 @router.get("/dashboard")
 def get_dashboard_stats(db: Session = Depends(get_db)):
