@@ -31,7 +31,7 @@ from .api.endpoints import websocket_endpoint
 app.add_api_websocket_route("/ws/processing/{dataset_id}", websocket_endpoint)
 
 # Setup path to frontend build
-FRONTEND_DIST = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../frontend/dist"))
+FRONTEND_DIST = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../frontend/dist"))
 
 if os.path.exists(FRONTEND_DIST):
     # Mount the static files (JS, CSS, assets)
