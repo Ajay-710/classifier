@@ -48,7 +48,7 @@ export const Results = () => {
           <p className="text-muted-foreground font-mono font-bold uppercase tracking-widest">&gt; Data ledger for payload #{datasetId}</p>
         </div>
         <button className="flex items-center gap-2 bg-foreground text-background border-4 border-border px-4 py-2 font-display text-xs uppercase hover-zag-shadow hover-zag-dotted-grid transition-all">
-          <Download size={18} strokeWidth={3} /> EXPORT CSV
+          <Download size={18} strokeWidth={3} /> EXPORT EXCEL
         </button>
       </div>
 
