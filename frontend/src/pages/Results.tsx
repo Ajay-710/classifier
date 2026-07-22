@@ -47,7 +47,7 @@ export const Results = () => {
           <h2 className="text-4xl font-display uppercase mb-4 text-foreground drop-shadow-[2px_2px_0px_hsl(var(--primary))]">Results_</h2>
           <p className="text-muted-foreground font-mono font-bold uppercase tracking-widest">&gt; Data ledger for payload #{datasetId}</p>
         </div>
-        <button className="flex items-center gap-2 bg-foreground text-background border-4 border-border px-4 py-2 font-display text-xs uppercase hover-zag-shadow hover-zag-dotted-grid transition-all">
+        <button onClick={() => window.open(`/api/datasets/${datasetId}/export`, '_blank')} className="flex items-center gap-2 bg-foreground text-background border-4 border-border px-4 py-2 font-display text-xs uppercase hover-zag-shadow hover-zag-dotted-grid transition-all">
           <Download size={18} strokeWidth={3} /> EXPORT EXCEL
         </button>
       </div>

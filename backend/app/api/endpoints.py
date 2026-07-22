@@ -95,6 +95,38 @@ def list_companies(
         "data": companies
     }
 
+@router.get("/datasets/{dataset_id}/export")
+def export_dataset(dataset_id: int, db: Session = Depends(get_db)):
+    companies = db.query(Company).filter(Company.dataset_id == dataset_id).all()
+    
+    data = []
+    for c in companies:
+        data.append({
+            "Original Name": c.original_name,
+            "Original Domain": c.original_domain,
+            "Official Domain": c.official_domain,
+            "Industry": c.industry,
+            "Status": c.status,
+            "Confidence Score": c.confidence_score,
+            "Description": c.description,
+            "LinkedIn URL": c.linkedin_url,
+            "Address": c.address
+        })
+        
+    df = pd.DataFrame(data)
+    
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Companies')
+    
+    output.seek(0)
+    
+    headers = {
+        'Content-Disposition': f'attachment; filename="estride_export_{dataset_id}.xlsx"'
+    }
+    
+    return StreamingResponse(output, headers=headers, media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
 @router.get("/dashboard")
 def get_dashboard_stats(db: Session = Depends(get_db)):
     total = db.query(Company).count()
