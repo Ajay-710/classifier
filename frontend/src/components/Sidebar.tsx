@@ -17,11 +17,9 @@ export const Sidebar = () => {
     <div className="w-64 h-full bg-background border-r-2 border-border flex flex-col font-mono shadow-[4px_0_0_0_hsl(var(--border))] z-10 relative">
       <div className="p-6 border-b-2 border-border mb-4 bg-primary/10">
         <h1 className="text-xl font-bold font-display text-primary uppercase tracking-tighter leading-tight">
-          ZAGGO
-          <br/>
-          NAUT
+          ESTRIDE
         </h1>
-        <p className="text-xs text-muted-foreground mt-2 font-mono uppercase tracking-widest">Enterprise_V1</p>
+        <p className="text-[11px] text-muted-foreground mt-2 font-mono uppercase tracking-widest font-bold">Industry Classifier</p>
       </div>
       
       <nav className="flex-1 px-4 space-y-2">
