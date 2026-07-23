@@ -12,3 +12,5 @@ duckduckgo-search>=6.1.7
 pydantic>=2.7.4
 python-multipart>=0.0.9
 lxml_html_clean
+psycopg2-binary>=2.9.9
+openai>=1.30.0
