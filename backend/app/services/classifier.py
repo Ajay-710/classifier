@@ -1,17 +1,7 @@
 import re
-import os
-import json
-
-try:
-    from openai import OpenAI
-except ImportError:
-    OpenAI = None
 
 class IndustryClassifier:
     def __init__(self):
-        self.api_key = os.environ.get("OPENAI_API_KEY")
-        self.client = OpenAI(api_key=self.api_key) if self.api_key and OpenAI else None
-
         # Weighted dictionary mapping keywords to Industries
         # Values are weights. Higher weight = stronger signal.
         self.industry_keywords = {
@@ -56,11 +46,15 @@ class IndustryClassifier:
             "Non-profit": {"non-profit": 5, "charity": 5, "ngo": 5, "philanthropy": 4, "donations": 3}
         }
 
-    def _fallback_classify(self, text: str) -> dict:
+    def classify(self, text: str) -> dict:
         """
         Classifies the text into an industry based on keyword frequencies and weights.
         Returns {"industry": str, "confidence": float, "keywords_matched": list}
         """
+        if not text:
+            return {"industry": "Unknown", "confidence": 0.0, "keywords_matched": []}
+
+        # Convert to lowercase for matching
         text_lower = text.lower()
         
         industry_scores = {}
@@ -71,10 +65,14 @@ class IndustryClassifier:
             matched = []
             
             for kw, weight in keywords.items():
+                # Use regex to find whole words only to prevent partial matches (e.g. "car" in "care")
+                # Escaping kw in case it has special regex chars
                 pattern = r'\b' + re.escape(kw) + r'\b'
                 matches = len(re.findall(pattern, text_lower))
                 
                 if matches > 0:
+                    # Score = weight * (1 + log(matches)) to prevent keyword stuffing dominating
+                    # Simple version: just weight * matches up to a cap
                     effective_matches = min(matches, 5) 
                     score += (weight * effective_matches)
                     matched.append(kw)
@@ -86,51 +84,17 @@ class IndustryClassifier:
         if not industry_scores:
             return {"industry": "Unknown", "confidence": 0.0, "keywords_matched": []}
 
+        # Sort by score descending
         sorted_industries = sorted(industry_scores.items(), key=lambda x: x[1], reverse=True)
+        
         top_industry = sorted_industries[0][0]
         top_score = sorted_industries[0][1]
-        confidence = min(top_score * 2.5, 99.9)
+        
+        # Calculate confidence 0-100 based on score magnitude and distance to runner up
+        confidence = min(top_score * 2.5, 99.9) # 40 points = 100%
         
         return {
             "industry": top_industry,
             "confidence": round(confidence, 1),
             "keywords_matched": industry_matched_words[top_industry]
         }
-
-    def classify(self, text: str) -> dict:
-        if not text:
-            return {"industry": "Unknown", "confidence": 0.0, "keywords_matched": []}
-
-        if not self.client:
-            return self._fallback_classify(text)
-
-        try:
-            prompt = (
-                "You are an expert industry classification engine. "
-                "Classify the following company description into a single primary industry. "
-                "Respond ONLY with a JSON object in this exact format: "
-                '{"industry": "Industry Name", "confidence": 95.5, "keywords_matched": ["key", "words"]}. '
-                "Ensure confidence is between 0 and 100. "
-                "Pick an industry that best describes the company's core business model. "
-                f"Company Description:\n{text[:2500]}"
-            )
-            
-            response = self.client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[{"role": "user", "content": prompt}],
-                response_format={ "type": "json_object" },
-                max_tokens=150,
-                temperature=0.1
-            )
-            
-            result_str = response.choices[0].message.content
-            result = json.loads(result_str)
-            
-            return {
-                "industry": str(result.get("industry", "Unknown")),
-                "confidence": float(result.get("confidence", 0.0)),
-                "keywords_matched": result.get("keywords_matched", [])
-            }
-        except Exception as e:
-            print(f"OpenAI Classification failed: {e}")
-            return self._fallback_classify(text)
